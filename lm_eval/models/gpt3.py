@@ -84,6 +84,10 @@ class GPT3LM(BaseLM):
 
         # Read from environment variable OPENAI_API_SECRET_KEY
         openai.api_key = os.environ["OPENAI_API_SECRET_KEY"]
+        if os.environ["OPENAI_API_BASE_URL"]:
+            base_url = os.environ["OPENAI_API_BASE_URL"]
+            print(f"Setting openAI base url to {base_url}")
+            openai.base_url = base_url
 
     @property
     def eot_token_id(self):

@@ -319,6 +319,7 @@ def evaluate(
         ]
 
         for resp, (i, task_name, doc, doc_id) in zip(resps, requests_origin[reqtype]):
+            print(f"Evaluator: start process res queue {task_name}, {doc_id}")        
             process_res_queue[(task_name, doc_id)].append((i, resp))
 
             if write_out:
@@ -332,6 +333,7 @@ def evaluate(
                     ]
                 else:
                     write_out_info[task_name][doc_id]["truth"] = task.doc_to_target(doc)
+            print(f"Evaluator: finished process res queue {task_name}, {doc_id}")        
 
     vals = collections.defaultdict(list)
 

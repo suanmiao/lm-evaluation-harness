@@ -84,12 +84,12 @@ class GPT3LM(BaseLM):
 
         # Read from environment variable OPENAI_API_SECRET_KEY
         openai.api_key = os.environ["OPENAI_API_SECRET_KEY"]
-        if os.environ["OPENAI_API_BASE_URL"]:
+        if "OPENAI_API_BASE_URL" in os.environ and os.environ["OPENAI_API_BASE_URL"]:
             api_base = os.environ["OPENAI_API_BASE_URL"]
             print(f"Setting openAI base url to {api_base}")
             openai.api_base = api_base
 
-        if os.environ["TARGET_MODEL_NAME"]:
+        if "TARGET_MODEL_NAME" in os.environ and os.environ["TARGET_MODEL_NAME"]:
             target_model_name = os.environ["TARGET_MODEL_NAME"]
             print(f"Setting target model name to {target_model_name}")
             self.target_model_name = target_model_name

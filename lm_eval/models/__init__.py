@@ -14,6 +14,7 @@ MODEL_REGISTRY = {
     "gpt2": gpt2.GPT2LM,
     "gpt3": gpt3.GPT3LM,
     "anthropic": anthropic_llms.AnthropicLM,
+    "vllm": anthropic_llms.vLLM,
     "textsynth": textsynth.TextSynthLM,
     "dummy": dummy.DummyLM,
     "gguf": gguf.GGUFLM

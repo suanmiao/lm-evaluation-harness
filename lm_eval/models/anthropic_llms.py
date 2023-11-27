@@ -110,3 +110,95 @@ class AnthropicLM(BaseLM):
     def _model_generate(self, context, max_length, eos_token_id):
         # Isn't used because we override greedy_until
         raise NotImplementedError()
+
+
+class vLLM(BaseLM):
+    REQ_CHUNK_SIZE = 20
+
+    def __init__(self, model="NousResearch/Llama-2-13b-chat-hf"):
+        """
+
+        :param model: str
+        """
+        super().__init__()
+
+        if os.environ["TARGET_MODEL_NAME"]:
+            target_model_name = os.environ["TARGET_MODEL_NAME"]
+            print(f"Setting target model name to {target_model_name}")
+            self.model = target_model_name
+
+    @property
+    def eot_token_id(self):
+        raise NotImplementedError("No idea about anthropic tokenization.")
+
+    @property
+    def max_length(self):
+        return 2048
+
+    @property
+    def max_gen_toks(self):
+        return 256
+
+    @property
+    def batch_size(self):
+        # Isn't used because we override _loglikelihood_tokens
+        raise NotImplementedError()
+
+    @property
+    def device(self):
+        # Isn't used because we override _loglikelihood_tokens
+        raise NotImplementedError()
+
+    def tok_encode(self, string: str):
+        raise NotImplementedError("No idea about anthropic tokenization.")
+
+    def tok_decode(self, tokens):
+        raise NotImplementedError("No idea about anthropic tokenization.")
+
+    def _loglikelihood_tokens(self, requests, disable_tqdm=False):
+        raise NotImplementedError("No support for logits.")
+
+    def vllm_complete(self, prompt, max_tokens_to_sample, temperature, stop):
+        # use requests to get the response
+        import requests
+        import json
+
+        url = "http://localhost:8006:v1/complete"
+        payload = {
+            "prompt": prompt,
+            "max_tokens": max_tokens_to_sample,
+            "temperature": temperature,
+        }
+        print(f"Sending request to {url} with payload {payload}")
+        headers = {"Content-Type": "application/json"}
+        response = requests.request(
+            "POST", url, headers=headers, data=json.dumps(payload)
+        )
+        # the response looks like this: {"id":"cmpl-f4b6d0f8e8cc409791c835864d812999","object":"text_completion","created":7108,"model":"NousResearch/Llama-2-13b-chat-hf","choices":[{"index":0,"text":" city that is known for its v","logprobs":null,"finish_reason":"length"}],"usage":{"prompt_tokens":5,"total_tokens":12,"completion_tokens":7}}
+        return response.json()["choices"][0]["text"]
+
+    def greedy_until(self, requests):
+        if not requests:
+            return []
+
+        res = []
+        for request in tqdm(requests):
+            inp = request[0]
+            request_args = request[1]
+            until = request_args["until"]
+            response = self.vllm_complete(
+                prompt=inp,
+                max_tokens_to_sample=self.max_gen_toks,
+                temperature=0.0,
+                stop=until,
+            )
+            res.append(response)
+        return res
+
+    def _model_call(self, inps):
+        # Isn't used because we override _loglikelihood_tokens
+        raise NotImplementedError()
+
+    def _model_generate(self, context, max_length, eos_token_id):
+        # Isn't used because we override greedy_until
+        raise NotImplementedError()

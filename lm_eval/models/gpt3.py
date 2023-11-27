@@ -89,6 +89,11 @@ class GPT3LM(BaseLM):
             print(f"Setting openAI base url to {api_base}")
             openai.api_base = api_base
 
+        if os.environ["TARGET_MODEL_NAME"]:
+            target_model_name = os.environ["TARGET_MODEL_NAME"]
+            print(f"Setting target model name to {target_model_name}")
+            self.target_model_name = target_model_name
+
     @property
     def eot_token_id(self):
         return self.tokenizer.eos_token_id
@@ -147,14 +152,26 @@ class GPT3LM(BaseLM):
                 inps.append(inp)
                 ctxlens.append(ctxlen)
 
-            response = oa_completion(
-                engine=self.engine,
-                prompt=inps,
-                echo=True,
-                max_tokens=0,
-                temperature=0.0,
-                logprobs=10,
-            )
+            if self.target_model_name:
+                print(f"Using target model {self.target_model_name}")
+                response = oa_completion(
+                    model=self.target_model_name,
+                    prompt=inps,
+                    echo=True,
+                    max_tokens=0,
+                    temperature=0.0,
+                    logprobs=10,
+                    target=self.target_model_name,
+                )
+            else:
+                response = oa_completion(
+                    engine=self.engine,
+                    prompt=inps,
+                    echo=True,
+                    max_tokens=0,
+                    temperature=0.0,
+                    logprobs=10,
+                )
 
             for resp, ctxlen, (cache_key, context_enc, continuation_enc) in zip(
                 response.choices, ctxlens, chunk

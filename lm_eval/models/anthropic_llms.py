@@ -126,6 +126,9 @@ class vLLM(BaseLM):
             target_model_name = os.environ["TARGET_MODEL_NAME"]
             print(f"Setting target model name to {target_model_name}")
             self.model = target_model_name
+            from transformers import AutoTokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained("NousResearch/Llama-2-13b-hf")
+
 
     @property
     def eot_token_id(self):
@@ -150,13 +153,16 @@ class vLLM(BaseLM):
         raise NotImplementedError()
 
     def tok_encode(self, string: str):
-        raise NotImplementedError("No idea about anthropic tokenization.")
+        ret = self.tokenizer.encode(string)
+        return ret
 
+        
     def tok_decode(self, tokens):
-        raise NotImplementedError("No idea about anthropic tokenization.")
+        ret = self.tokenizer.decode(tokens)
+        return ret
 
     def _loglikelihood_tokens(self, requests, disable_tqdm=False):
-        raise NotImplementedError("No support for logits.")
+        raise NotImplementedError(f"No support for logits. requests = {requests} ")
 
     def vllm_complete(self, prompt, max_tokens_to_sample, temperature, stop):
         # use requests to get the response

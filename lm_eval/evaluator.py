@@ -221,6 +221,7 @@ def evaluate(
 
     # get lists of each type of request
     for task_name, task in task_dict_items:
+        print(f"Evaluator: Start evaluating task {task_name}")        
         versions[task_name] = task.VERSION
         # default to test doc, fall back to val doc if validation unavailable
         # TODO: the test-fallback-to-val system isn't final, we should revisit it at some point
@@ -288,6 +289,7 @@ def evaluate(
 
         if write_out:
             write_out_info[task_name] = prompt_details
+    print(f"Evaluator: Start Compare all tasks/sets at once to ensure a single training set scan ")        
 
     # Compare all tasks/sets at once to ensure a single training set scan
     if decontaminate:
@@ -300,6 +302,8 @@ def evaluate(
 
     # all responses for each (task, doc)
     process_res_queue = collections.defaultdict(list)
+
+    print(f"Evaluator: execute each type of request")        
 
     # execute each type of request
     for reqtype, reqs in requests.items():
@@ -331,6 +335,8 @@ def evaluate(
 
     vals = collections.defaultdict(list)
 
+    print(f"Evaluator: unpack results and sort back in order and return control to Task")        
+
     # unpack results and sort back in order and return control to Task
     for (task_name, doc_id), requests in process_res_queue.items():
         requests.sort(key=lambda x: x[0])
@@ -351,6 +357,7 @@ def evaluate(
                 if doc_id not in overlaps[task_name]:
                     vals[(task_name, metric + decontaminate_suffix)].append(value)
 
+    print(f"Evaluator: aggregate results")        
     # aggregate results
     for (task_name, metric), items in vals.items():
         task = task_dict[task_name]
@@ -395,7 +402,7 @@ def evaluate(
                 encoding="utf8",
             ) as fp:
                 json.dump(write_out_info[task_name], fp, indent=4, ensure_ascii=False)
-
+    print(f"Evaluator: return result")        
     return {"results": dict(results), "versions": dict(versions)}
 
 

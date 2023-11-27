@@ -65,7 +65,9 @@ def main():
     if args.description_dict_path:
         with open(args.description_dict_path, "r") as f:
             description_dict = json.load(f)
-
+            
+    print(f"Started evaluating tasks: {task_names}")
+    
     results = evaluator.simple_evaluate(
         model=args.model,
         model_args=args.model_args,
@@ -82,6 +84,7 @@ def main():
         write_out=args.write_out,
         output_base_path=args.output_base_path,
     )
+    print(f"Finished evaluating tasks: {task_names}")
 
     dumped = json.dumps(results, indent=2)
     print(dumped)

@@ -314,10 +314,23 @@ def evaluate(
 
         print("Running", reqtype, "requests")
         resps = getattr(lm, reqtype)([req.args for req in reqs])
-        resps = [
-            x if req.index is None else x[req.index] for x, req in zip(resps, reqs)
-        ]
+        print(f"Start running with {len(resps)} responses")
+        # resps = [
+        #     x if req.index is None else x[req.index] for x, req in zip(resps, reqs)
+        # ]
+        # rewrite using for loop
+        resps = []
+        curr_index = 0
+        for x, req in zip(resps, reqs):
+            curr_index += 1
+            if req.index is None:
+                resps.append(x)
+            else:
+                resps.append(x[req.index])
+            if curr_index % 100 == 0:
+                print(f"Running {curr_index} requests out of {len(resps)}")
 
+        print("Finished", reqtype, "requests")
         for resp, (i, task_name, doc, doc_id) in zip(resps, requests_origin[reqtype]):
             print(f"Evaluator: start process res queue {task_name}, {doc_id}")        
             process_res_queue[(task_name, doc_id)].append((i, resp))
